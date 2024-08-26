@@ -1,66 +1,54 @@
 <script setup>
-  const runtimeConfig = useRuntimeConfig()
-  const colors = [
-    '#f87171',
-    '#fb923c',
-    '#fbbf24',
-    '#facc15',
-    '#a3e635',
-    '#4ade80',
-    '#34d399',
-    '#2dd4bf',
-    '#22d3ee',
-    '#38bdf8',
-    '#60a5fa',
-    '#818cf8',
-    '#a78bfa',
-    '#c084fc',
-    '#e879f9',
-    '#f472b6',
-    '#fb7185',
-  ]
-  const color = useState(
-    'color',
-    () => colors[Math.floor(Math.random() * colors.length)]
-  )
+	const todos = ref([])
+	const newTodo = ref('')
+	const inputRef = ref(null)
+	const loading = ref(false)
+	const AddTodo = () => {
+		if (!newTodo.value) return
+		loading.value = true
+
+		todos.value.push(newTodo.value)
+		newTodo.value = ''
+
+		nextTick(() => {
+			inputRef.value?.input?.focus()
+		})
+
+		setTimeout(() => {
+			loading.value = false
+		}, 1000)
+	}
 </script>
 
 <template>
-  <div class="centered">
-    <h1 :style="{ color }">
-      {{ runtimeConfig.public.helloText }}
-    </h1>
-    <NuxtLink to="/" external> refresh </NuxtLink>
-  </div>
-</template>
+	<UContainer class="flex items-center justify-center min-h-screen">
+		<UCard>
+			<template #header> TodoList </template>
 
-<style scoped>
-  .centered {
-    position: absolute;
-    width: 100%;
-    text-align: center;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    margin: 0;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
-      Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue',
-      sans-serif;
-  }
-  h1 {
-    font-size: 32px;
-  }
-  @media (min-width: 768px) {
-    h1 {
-      font-size: 64px;
-    }
-  }
-  a {
-    color: #888;
-    text-decoration: none;
-    font-size: 18px;
-  }
-  a:hover {
-    text-decoration: underline;
-  }
-</style>
+			<div class="w-[500px]">
+				<Flex class="gap-x-8 items-center justify-between">
+					<UInput
+						ref="inputRef"
+						autofocus
+						v-model.trim="newTodo"
+						placeholder="Add Todo"
+						class="w-full"
+						@keyup.native.enter="AddTodo"
+						:disabled="loading"
+						size="lg"
+					/>
+					<UButton icon="i-tdesign-enter" trailing @click="AddTodo" :loading="loading"> Add </UButton>
+				</Flex>
+			</div>
+
+			<template #footer>
+				<ul>
+					<li v-for="(todo, index) in todos" :key="index" class="text-2xl mb-2 space-y-2">
+						<p>{{ todo }}</p>
+						<UDivider />
+					</li>
+				</ul>
+			</template>
+		</UCard>
+	</UContainer>
+</template>
