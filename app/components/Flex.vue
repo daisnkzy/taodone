@@ -1,12 +1,7 @@
-<script setup>
-	defineProps({
-		class: String,
-		default: '',
-	})
-</script>
+<script setup></script>
 
 <template>
-	<div class="flex" :class="class">
+	<div class="flex">
 		<slot></slot>
 	</div>
 </template>
