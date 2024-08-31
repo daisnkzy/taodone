@@ -5,9 +5,12 @@
 	const originalTodos = ref([])
 
 	//useFetch每次跳转页面都会重新获取数据，用useAsyncData可以缓存数据，跳转回原来的页面就不用重新发出请求
-	const { data: todos, refresh } = await useAsyncData('todos', () =>
+	const { data, refresh } = await useAsyncData('todos', () =>
 		$fetch('/api/todo')
 	)
+	// data是只读的，修改它不会生效，所以用ref将它转变为响应式数据
+	const todos = ref(data.value)
+
 	const handleAddTodo = async () => {
 		loading.value = true
 
@@ -21,8 +24,8 @@
 		}
 
 		todos.value.push(optimisticTodo)
+
 		newTodo.value = ''
-		await refresh()
 
 		try {
 			const createdTodo = await $fetch('/api/todo', {
@@ -51,6 +54,7 @@
 			nextTick(() => {
 				inputRef.value?.input?.focus()
 			})
+			await refresh()
 		}
 	}
 
@@ -59,8 +63,7 @@
 
 		const optimisticCompleted = Number(!todo.completed)
 		todo.completed = optimisticCompleted
-		await refresh()
-
+		console.log(todo)
 		try {
 			await $fetch(`/api/todo/${todo.id}`, {
 				method: 'PATCH',
@@ -72,6 +75,7 @@
 			todos.value = originalTodos.value
 			console.log('failed update todo')
 		} finally {
+			await refresh()
 		}
 	}
 
@@ -79,7 +83,6 @@
 		originalTodos.value = [...todos.value] //保存原始todos
 
 		todos.value = todos.value.filter((item) => item.id !== todo.id) //先在本地删除todo，把UI先更新了
-		await refresh()
 
 		try {
 			await $fetch(`/api/todo/${todo.id}`, {
@@ -90,6 +93,7 @@
 
 			console.log('delete todo error', error)
 		} finally {
+			await refresh()
 		}
 	}
 </script>
