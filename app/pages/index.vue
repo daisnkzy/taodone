@@ -22,6 +22,7 @@
 
 		todos.value.push(optimisticTodo)
 		newTodo.value = ''
+		await refresh()
 
 		try {
 			const createdTodo = await $fetch('/api/todo', {
@@ -46,7 +47,6 @@
 			todos.value = originalTodos.value
 			console.error('create todo error')
 		} finally {
-			await refresh()
 			loading.value = false
 			nextTick(() => {
 				inputRef.value?.input?.focus()
@@ -59,6 +59,7 @@
 
 		const optimisticCompleted = Number(!todo.completed)
 		todo.completed = optimisticCompleted
+		await refresh()
 
 		try {
 			await $fetch(`/api/todo/${todo.id}`, {
@@ -71,7 +72,6 @@
 			todos.value = originalTodos.value
 			console.log('failed update todo')
 		} finally {
-			await refresh()
 		}
 	}
 
@@ -79,6 +79,7 @@
 		originalTodos.value = [...todos.value] //保存原始todos
 
 		todos.value = todos.value.filter((item) => item.id !== todo.id) //先在本地删除todo，把UI先更新了
+		await refresh()
 
 		try {
 			await $fetch(`/api/todo/${todo.id}`, {
@@ -89,7 +90,6 @@
 
 			console.log('delete todo error', error)
 		} finally {
-			await refresh()
 		}
 	}
 </script>
